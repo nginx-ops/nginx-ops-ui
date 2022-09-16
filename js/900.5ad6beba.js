@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunknginx_ops_ui"]=self["webpackChunknginx_ops_ui"]||[]).push([[900],{3900:function(n,t,o){o.r(t),o.d(t,{default:function(){return f}});var e=function(){var n=this,t=n._self._c;return t("div",[n._v("我是monitor页面")])},u=[],i={name:"monitor",mounted(){this.$http.get("http://49.232.174.49:9988/conf/info/template/").then((function(n){console.log(n,"get成功")})).catch((function(n){console.log(n,"get失败")})).then((function(){}))}},c=i,l=o(1001),s=(0,l.Z)(c,e,u,!1,null,null,null),f=s.exports}}]);
+//# sourceMappingURL=900.5ad6beba.js.map
