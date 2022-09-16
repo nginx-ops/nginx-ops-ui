@@ -24,3 +24,10 @@ npm run lint
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 测试推送~
+
+### 推送到gh-pages的操作
+
+```
+yarn deploy
+```
+
