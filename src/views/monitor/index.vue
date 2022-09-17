@@ -10,11 +10,13 @@ export default {
   mounted() {
     // aixos请求
     this.$http
-      .post("http://49.232.174.49:9988/conf/info/comm", {
-        type: "我是type",
-        name: "张三",
-        value: "我是value",
-      })
+      .post("http://49.232.174.49:9988/conf/info/comm", [
+        {
+          type: "我是type",
+          name: "张三a",
+          value: "我是value",
+        },
+      ])
       .then(function (response) {
         // 处理成功情况
         console.log(response, "post成功");
