@@ -24,7 +24,7 @@ jobs:
       - name: Install and Build
         run: |
           npm install
-          npm run build
+          npm run build:prod
       # 执行JamesIves/github-pages-deploy-action将项目发布到Github Pages
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@3.7.1
