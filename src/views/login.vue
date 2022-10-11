@@ -105,7 +105,7 @@ export default {
 			},
 			loading: false,
 			// 注册开关
-			register: true,
+			register: false,
 			redirect: undefined,
 		};
 	},

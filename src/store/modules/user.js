@@ -1,12 +1,13 @@
 import adminApi from '@/api/adminApi'
 import { getToken, setToken, removeToken } from '@/utils/auth'
-import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
-    avatar: ''
+    avatar: '',
+    permissions: [],
+    roles: []
   }
 }
 
@@ -24,11 +25,17 @@ const mutations = {
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
+  },
+  SET_PERMISSIONS: (state, permissions) => {
+    state.permissions = permissions
+  },
+  SET_ROLES: (state, roles) => {
+    state.roles = roles
   }
 }
 
 const actions = {
-  // user login
+  // 登陆
   login({ commit }, loginForm) {
     return new Promise((resolve, reject) => {
       adminApi.login(loginForm).then(response => {
@@ -42,49 +49,54 @@ const actions = {
     })
   },
 
-  // // get user info
-  // getInfo({ commit, state }) {
-  //   return new Promise((resolve, reject) => {
-  //     getInfo(state.token).then(response => {
-  //       const { data } = response
+  // 获取用户详细信息
+  getInfo({ commit }) {
+    return new Promise((resolve, reject) => {
+      adminApi.getInfo().then(response => {
+        const { data } = response
 
-  //       if (!data) {
-  //         return reject('Verification failed, please Login again.')
-  //       }
+        if (!data) {
+          return reject('用户信息获取失败')
+        }
+        // 解析data中的信息
+        const { sysUser, permList, sysRoleList } = data
 
-  //       const { name, avatar } = data
+        if (sysRoleList && sysRoleList.length > 0) { // 验证返回的roles是否是一个非空数组
+          commit('SET_ROLES', sysRoleList)
+          commit('SET_PERMISSIONS', permList)
+        } else {
+          commit('SET_ROLES', ['ROLE_DEFAULT'])
+        }
+        commit('SET_NAME', sysUser.nickName)
+        commit('SET_AVATAR', sysUser.avatar)
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
 
-  //       commit('SET_NAME', name)
-  //       commit('SET_AVATAR', avatar)
-  //       resolve(data)
-  //     }).catch(error => {
-  //       reject(error)
-  //     })
-  //   })
-  // },
-
-  // // user logout
-  // logout({ commit, state }) {
-  //   return new Promise((resolve, reject) => {
-  //     logout(state.token).then(() => {
-  //       removeToken() // must remove  token  first
-  //       resetRouter()
-  //       commit('RESET_STATE')
-  //       resolve()
-  //     }).catch(error => {
-  //       reject(error)
-  //     })
-  //   })
-  // },
+  // 退出
+  logout({ commit }) {
+    return new Promise((resolve, reject) => {
+      adminApi.logout().then(() => {
+        removeToken()
+        commit('RESET_STATE')
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
 
   // remove token
-  resetToken({ commit }) {
-    return new Promise(resolve => {
-      removeToken() // must remove  token  first
-      commit('RESET_STATE')
-      resolve()
-    })
-  }
+  // resetToken({ commit }) {
+  //   return new Promise(resolve => {
+  //     removeToken() // must remove  token  first
+  //     commit('RESET_STATE')
+  //     resolve()
+  //   })
+  // }
 }
 
 export default {
