@@ -131,43 +131,49 @@ export default {
 			});
 		},
 		getCookie() {
-			// const username = Cookies.get("username");
-			// const password = Cookies.get("password");
-			// const rememberMe = Cookies.get('rememberMe')
-			// this.loginForm = {
-			//   username: username === undefined ? this.loginForm.username : username,
-			//   password: password === undefined ? this.loginForm.password : decrypt(password),
-			//   rememberMe: rememberMe === undefined ? false : Boolean(rememberMe)
-			// };
+			// 获取记住我账号信息
+			const loginName = Cookies.get("loginName");
+			const password = Cookies.get("password");
+			const rememberMe = Cookies.get("rememberMe");
+			this.loginForm.loginName=(loginName === undefined ? this.loginForm.loginName : loginName)
+			this.loginForm.password=(password === undefined ? this.loginForm.password : password)
+			this.loginForm.rememberMe=(rememberMe === undefined ? false : Boolean(rememberMe))
 		},
 		handleLogin() {
 			this.$refs.loginForm.validate((valid) => {
 				if (valid) {
-					// this.loading = true;
+					this.loading = true;
+
+					// 判断是否记住我
+					if (this.loginForm.rememberMe) {
+						Cookies.set("loginName", this.loginForm.loginName, { expires: 30 });
+						Cookies.set("password", this.loginForm.password, {
+							expires: 30,
+						});
+						Cookies.set("rememberMe", this.loginForm.rememberMe, {
+							expires: 30,
+						});
+					} else {
+						Cookies.remove("loginName");
+						Cookies.remove("password");
+						Cookies.remove("rememberMe");
+					}
+
 					// 获取登录设备信息
 					this.loginForm.device = navigator.userAgent.toLowerCase();
-					// console.log("data", this.loginForm);
 
-					// adminApi.login(this.loginForm).then((res) => {
-					// 	const data = res.data;
-					// 	if (this.loginForm.rememberMe) {
-					// 		// 持久化存token
-					// 		console.log(data);
-							
-					// 	} else {
-					// 		// 关闭浏览器清除token
-					// 		console.log(data);
-					// 	}
-					// });
-
-					this.$store.dispatch("user/login", this.loginForm).then(() => {
-					  this.$router.push({ path: this.redirect || "/" }).catch(()=>{});
-					}).catch(() => {
-					  this.loading = false;
-					  if (this.captchaEnabled) {
-					    this.getCode();
-					  }
-					});
+					this.$store
+						.dispatch("user/login", this.loginForm)
+						.then(() => {
+							this.loading = false;
+							this.$router.push({ path: this.redirect || "/" }).catch(() => {});
+						})
+						.catch(() => {
+							this.loading = false;
+							if (this.captchaEnabled) {
+								this.getCode();
+							}
+						});
 				}
 			});
 		},
