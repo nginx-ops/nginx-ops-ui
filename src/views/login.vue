@@ -5,7 +5,7 @@
 			:model="loginForm"
 			:rules="loginRules"
 			class="login-form">
-			<h3 class="title">nginx后台管理系统</h3>
+			<h3 class="title">{{title}}</h3>
 			<el-form-item prop="loginName">
 				<el-input
 					v-model="loginForm.loginName"
@@ -78,11 +78,13 @@
 
 <script>
 import adminApi from "@/api/adminApi";
+import Cookies from "js-cookie";
 
 export default {
 	name: "Login",
 	data() {
 		return {
+			title: this.$store.state.settings.loginTile,
 			codeUrl: "",
 			loginForm: {
 				loginName: "",
@@ -165,7 +167,7 @@ export default {
 					this.$store
 						.dispatch("user/login", this.loginForm)
 						.then(() => {
-							this.loading = false;
+							this.loading = true;
 							this.$router.push({ path: this.redirect || "/" }).catch(() => {});
 						})
 						.catch(() => {

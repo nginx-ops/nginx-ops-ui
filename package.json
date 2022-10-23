@@ -1,8 +1,8 @@
 {
-  "name": "vue-admin-template",
-  "version": "4.4.0",
-  "description": "A vue admin template with Element UI & axios & iconfont & permission control & lint",
-  "author": "Pan <panfree23@gmail.com>",
+  "name": "hongye",
+  "version": "3.3.3",
+  "description": "红叶管理系统",
+  "author": "wgy",
   "scripts": {
     "dev": "vue-cli-service serve",
     "build:prod": "vue-cli-service build",
@@ -11,6 +11,7 @@
     "svgo": "svgo -f src/icons/svg --config=src/icons/svgo.yml"
   },
   "dependencies": {
+    "@riophae/vue-treeselect": "^0.4.0",
     "axios": "0.18.1",
     "core-js": "3.6.5",
     "element-ui": "2.13.2",

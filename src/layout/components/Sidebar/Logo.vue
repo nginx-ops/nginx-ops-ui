@@ -24,8 +24,8 @@ export default {
   },
   data() {
     return {
-      title: 'nginx后台管理系统',
-      logo: 'http://nginx.org/favicon.ico'
+      title: this.$store.state.settings.sidebarLogoTitle,
+      logo: this.$store.state.settings.sidebarLogoUrl
     }
   }
 }

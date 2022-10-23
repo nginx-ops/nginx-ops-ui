@@ -54,7 +54,7 @@ router.beforeEach((to, from, next) => {
       // 在免登录白名单，直接进入
       next()
     } else {
-      Message.error("当前登录已失效,请重新登陆")
+      // Message.error("当前登录已失效,请重新登陆")
       next(`/login?redirect=${to.fullPath}`) // 否则全部重定向到登录页
       NProgress.done()
     }

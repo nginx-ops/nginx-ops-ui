@@ -1,7 +1,13 @@
 import axios from 'axios'
-import { MessageBox, Message } from 'element-ui'
+import { MessageBox, Message, Notification } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
+import { tansParams, blobValidate } from "@/utils/ruoyi";
+
+axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
+
+// 是否显示重新登录
+export let isRelogin = { show: false };
 
 // create an axios instance
 const service = axios.create({
@@ -21,6 +27,13 @@ service.interceptors.request.use(
       // please modify it according to the actual situation
       config.headers['Authentication'] = getToken()
     }
+    // get请求映射params参数
+    if (config.method === 'get' && config.data) {
+      let url = config.url + '?' + tansParams(config.data);
+      url = url.slice(0, -1);
+      config.data = {};
+      config.url = url;
+    }
     return config
   },
   error => {
@@ -32,49 +45,69 @@ service.interceptors.request.use(
 
 // response interceptor
 service.interceptors.response.use(
-  /**
-   * If you want to get http information such as headers or status
-   * Please return  response => response
-  */
 
-  /**
-   * Determine the request status by custom code
-   * Here is just an example
-   * You can also judge the status by HTTP Status Code
-   */
   response => {
+    // 获取返回数据
     const res = response.data
 
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== "00000") {
-      Message({
-        message: res.message || 'Error',
-        type: 'error',
-        duration: 5 * 1000
-      })
+    // 二进制数据则直接返回
+    if (response.request.responseType === 'blob' || response.request.responseType === 'arraybuffer') {
+      return response.data
+    }
 
-      // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014 || res.code === 500) {
-        // to re-login
-        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-          confirmButtonText: 'Re-Login',
-          cancelButtonText: 'Cancel',
+    // 鉴权异常
+    if (res.code === "A0005" || res.code === "A0006" || res.code === "A0007") {
+      if (!isRelogin.show) {
+        isRelogin.show = true;
+        MessageBox.confirm('登录状态已过期，您可以继续留在该页面，或者重新登录', '系统提示', {
+          confirmButtonText: '重新登录',
+          cancelButtonText: '取消',
           type: 'warning'
-        }).then(() => {
+        }
+        ).then(() => {
+          isRelogin.show = false;
+          // 清除token 跳转登录页
           store.dispatch('user/resetToken').then(() => {
-            location.reload()
+            location.href = "/"
           })
-        })
+        }).catch(() => {
+          isRelogin.show = false;
+        });
       }
-      return Promise.reject(new Error(res.message || 'Error'))
+      return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
+    } 
+    // else if (res.code === "500") {
+    //   // 通用错误
+    //   Message({
+    //     message: res.message,
+    //     type: 'error'
+    //   })
+    //   return Promise.reject(new Error(res.message))
+    // }
+     else if (res.code !== "00000") {
+      // 其他错误
+      Notification.error({
+        title: res.message
+      })
+      return Promise.reject('error')
     } else {
       return res
     }
   },
   error => {
-    console.log('err' + error) // for debug
+    console.log('err' + error)
+    let { message } = error;
+    if (message == "Network Error") {
+      message = "后端接口连接异常";
+    }
+    else if (message.includes("timeout")) {
+      message = "系统接口请求超时";
+    }
+    else if (message.includes("Request failed with status code")) {
+      message = "系统接口" + message.substr(message.length - 3) + "异常";
+    }
     Message({
-      message: error.message,
+      message: message,
       type: 'error',
       duration: 5 * 1000
     })
